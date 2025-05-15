@@ -1,0 +1,27 @@
+meta {
+  name: DeleteResource
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseURL}}/api/resources/{{resourceID}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  204 No Content
+  ```
+}

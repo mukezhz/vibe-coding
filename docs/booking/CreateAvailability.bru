@@ -1,0 +1,54 @@
+meta {
+  name: CreateAvailability
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseURL}}/api/resources/{{resourceID}}/availability
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "start_time": "2025-06-01T09:00:00Z",
+    "end_time": "2025-06-01T17:00:00Z",
+    "is_recurring": true,
+    "recur_rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    },
+    body: {
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      is_recurring: boolean,
+      recur_rule: string (iCalendar RFC 5545 format)
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      resource_id: string,
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      is_recurring: boolean,
+      recur_rule: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

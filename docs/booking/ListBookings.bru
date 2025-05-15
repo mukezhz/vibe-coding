@@ -1,0 +1,59 @@
+meta {
+  name: ListBookings
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseURL}}/api/bookings?page=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  limit: 10
+  resource_id: "{{resourceID}}"
+  user_id: "{{userID}}"
+  status: "confirmed"
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    query: {
+      page: number,
+      limit: number,
+      resource_id: string,
+      user_id: string,
+      status: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    items: [
+      {
+        id: string,
+        resource_id: string,
+        user_id: string,
+        start_time: string (ISO8601 date format),
+        end_time: string (ISO8601 date format),
+        status: string,
+        notes: string,
+        reference: string,
+        created_at: date,
+        updated_at: date
+      }
+    ],
+    page: {
+      total: number,
+      has_next: boolean
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

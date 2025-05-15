@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "vibe_coding",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

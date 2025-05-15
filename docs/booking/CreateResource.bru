@@ -1,0 +1,60 @@
+meta {
+  name: CreateResource
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseURL}}/api/resources
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Conference Room A",
+    "description": "Large conference room with projector",
+    "type": "room",
+    "capacity": 20,
+    "location": "Building 2, Floor 3",
+    "attributes": {
+      "has_projector": true,
+      "has_video_conferencing": true,
+      "size_sqft": 400
+    }
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    body: {
+      name: string,
+      description: string,
+      type: string,
+      capacity: number,
+      location: string,
+      attributes: object
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      name: string,
+      description: string,
+      type: string,
+      capacity: number,
+      location: string,
+      attributes: object,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

@@ -1,0 +1,43 @@
+meta {
+  name: GetOrganizationByID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseURL}}/api/organizations/{{orgID}}
+  body: none
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "new title",
+    "description": "new description"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      orgID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      title: string,
+      description: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

@@ -1,0 +1,57 @@
+meta {
+  name: UpdateBooking
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{baseURL}}/api/bookings/{{bookingID}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "start_time": "2025-06-01T10:30:00Z",
+    "end_time": "2025-06-01T12:30:00Z",
+    "notes": "Updated team meeting",
+    "status": "confirmed"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      bookingID: string
+    },
+    body: {
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      status: string,
+      notes: string,
+      reference: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      resource_id: string,
+      user_id: string,
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      status: string,
+      notes: string,
+      reference: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

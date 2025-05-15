@@ -1,0 +1,39 @@
+meta {
+  name: FetchTodoWithPagination
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseURL}}/api/todos?page=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  limit: 10
+}
+
+docs {
+  # Request Section
+  ```
+  ```
+  
+  # Response Section
+  ```
+  {
+    items: [
+      {
+        id: string,
+        title: string
+      }
+    ],
+    page: {
+      has_next: bool,
+      total: int
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

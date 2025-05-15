@@ -1,0 +1,40 @@
+meta {
+  name: GetResourceByID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseURL}}/api/resources/{{resourceID}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      name: string,
+      description: string,
+      type: string,
+      capacity: number,
+      location: string,
+      attributes: object,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}
