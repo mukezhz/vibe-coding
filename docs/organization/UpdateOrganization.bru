@@ -1,0 +1,50 @@
+meta {
+  name: UpdateOrganization
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseURL}}/api/organizations/{{orgID}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "new title",
+    "location": "new description",
+    "established_at": "date"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      orgID: string
+    },
+    body: {
+      name?: string,
+      location?: string,
+      established_at?: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      name: string,
+      location: string,
+      established_at: date,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

@@ -1,0 +1,41 @@
+meta {
+  name: ListResourceAvailabilities
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseURL}}/api/resources/{{resourceID}}/availabilities
+  body: none
+  auth: inherit
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    items: [
+      {
+        id: string,
+        resource_id: string,
+        start_time: string (ISO8601 date format),
+        end_time: string (ISO8601 date format),
+        is_recurring: boolean,
+        recur_rule: string,
+        created_at: date,
+        updated_at: date
+      }
+    ],
+    message: "success" | "fail"
+  }
+  ```
+}

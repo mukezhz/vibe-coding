@@ -1,0 +1,47 @@
+meta {
+  name: UpdateTodo
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseURL}}/api/todos/{{todoID}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "new title",
+    "description": "new description"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      todoID: string
+    },
+    body: {
+      title?: string,
+      description?: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      title: string,
+      description: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

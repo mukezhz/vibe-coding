@@ -1,0 +1,27 @@
+meta {
+  name: CancelBooking
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{baseURL}}/api/bookings/{{bookingID}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      bookingID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  204 No Content
+  ```
+}

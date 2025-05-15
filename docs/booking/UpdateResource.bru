@@ -1,0 +1,61 @@
+meta {
+  name: UpdateResource
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseURL}}/api/resources/{{resourceID}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Conference Room B",
+    "description": "Updated description",
+    "capacity": 25,
+    "attributes": {
+      "has_projector": true,
+      "has_video_conferencing": true,
+      "has_whiteboard": true
+    }
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    },
+    body: {
+      name: string,
+      description: string,
+      type: string,
+      capacity: number,
+      location: string,
+      attributes: object
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      name: string,
+      description: string,
+      type: string,
+      capacity: number,
+      location: string,
+      attributes: object,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

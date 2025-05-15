@@ -1,0 +1,44 @@
+meta {
+  name: CreateTodo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseURL}}/api/todos
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "todo title",
+    "description": "todo description"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    body: {
+     title: string,
+     description?: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      title: string,
+      description: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

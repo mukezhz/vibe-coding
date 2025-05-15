@@ -1,0 +1,42 @@
+meta {
+  name: CheckMultipleResourceAvailability
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseURL}}/api/availability
+  body: none
+  auth: inherit
+}
+
+params:query {
+  resource_ids: ["resource-uuid-1", "resource-uuid-2", "resource-uuid-3"]
+  start: 2025-06-01T09:00:00Z
+  end: 2025-06-01T11:00:00Z
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    query: {
+      resource_ids: string[] (array of resource UUIDs),
+      start: string (ISO8601 date format),
+      end: string (ISO8601 date format)
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    results: {
+      "resource-uuid-1": boolean,
+      "resource-uuid-2": boolean,
+      "resource-uuid-3": boolean
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

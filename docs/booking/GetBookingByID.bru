@@ -1,0 +1,41 @@
+meta {
+  name: GetBookingByID
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseURL}}/api/bookings/{{bookingID}}
+  body: none
+  auth: inherit
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      bookingID: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      resource_id: string,
+      user_id: string,
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      status: string,
+      notes: string,
+      reference: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

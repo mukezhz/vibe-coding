@@ -1,0 +1,39 @@
+meta {
+  name: CheckResourceAvailability
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseURL}}/api/resources/{{resourceID}}/availability?start={{startTime}}&end={{endTime}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  start: 2025-06-01T09:00:00Z
+  end: 2025-06-01T11:00:00Z
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    path: {
+      resourceID: string
+    },
+    query: {
+      start: string (ISO8601 date format),
+      end: string (ISO8601 date format)
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    available: boolean,
+    message: "success" | "fail"
+  }
+  ```
+}

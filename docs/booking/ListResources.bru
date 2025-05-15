@@ -1,0 +1,58 @@
+meta {
+  name: ListResources
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseURL}}/api/resources?page=1&limit=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  limit: 10
+  type: room
+  location: Building 2
+  capacity: 10
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    query: {
+      page: number,
+      limit: number,
+      type: string,
+      location: string,
+      capacity: number
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    items: [
+      {
+        id: string,
+        name: string,
+        description: string,
+        type: string,
+        capacity: number,
+        location: string,
+        attributes: object,
+        created_at: date,
+        updated_at: date
+      }
+    ],
+    page: {
+      total: number,
+      has_next: boolean
+    },
+    message: "success" | "fail"
+  }
+  ```
+}

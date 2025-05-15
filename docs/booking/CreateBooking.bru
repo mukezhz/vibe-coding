@@ -1,0 +1,55 @@
+meta {
+  name: CreateBooking
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseURL}}/api/bookings
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "resource_id": "{{resourceID}}",
+    "start_time": "2025-06-01T10:00:00Z",
+    "end_time": "2025-06-01T12:00:00Z",
+    "notes": "Team meeting",
+    "reference": "Meeting-123"
+  }
+}
+
+docs {
+  # Request Section
+  ```
+  {
+    body: {
+      resource_id: string,
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      notes: string,
+      reference: string
+    }
+  }
+  ```
+  
+  # Response Section
+  ```
+  {
+    item: {
+      id: string,
+      resource_id: string,
+      user_id: string,
+      start_time: string (ISO8601 date format),
+      end_time: string (ISO8601 date format),
+      status: string,
+      notes: string,
+      reference: string,
+      created_at: date,
+      updated_at: date
+    },
+    message: "success" | "fail"
+  }
+  ```
+}
