@@ -36,8 +36,13 @@ func TestTodo(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Todo Suite")
 }
-```
 
+// Define the test interface that will be used in test files
+var t GinkgoTInterface
+var _ = BeforeSuite(func() {
+	t = GinkgoT()
+})
+```
 ## API Testing Example
 
 Here's an example of how to test API endpoints using our architecture:
@@ -60,25 +65,27 @@ import (
 	"go.uber.org/fx"
 )
 
-var (
-	t      GinkgoTInterface
-	router infrastructure.Router
-)
+var _ = Describe("Domain/Todo/Route", Ordered, func() {
+	var (
+		router      infrastructure.Router
+		todoService *todo.Service
+		todoRepo    *todo.Repository
+	)
 
-var _ = BeforeSuite(func() {
-	t = GinkgoT()
-	setupDI := func() {
-		err := testutil.DI(t,
-			fx.Populate(&router),
-		)
-		if err != nil {
-			t.Error(err)
+	BeforeAll(func() {
+		setupDI := func() {
+			err := testutil.DI(t,
+				fx.Populate(&router),
+				fx.Populate(&todoService),
+				fx.Populate(&todoRepo),
+			)
+			if err != nil {
+				t.Error(err)
+			}
 		}
-	}
-	setupDI()
-})
+		setupDI()
+	})
 
-var _ = Describe("Domain/Todo/Route", func() {
 	// Helper function for reuse
 	createTodo := func(title string, description string) (string, error) {
 		reqBody := fmt.Sprintf(`{"title": "%s", "description": "%s"}`, title, description)
@@ -122,29 +129,132 @@ var _ = Describe("Domain/Todo/Route", func() {
 		Expect(responseBody.Item.Description).To(Equal("Test Description"))
 		Expect(responseBody.Item.ID).NotTo(BeEmpty())
 	})
+})
+```
+## Testing Error Cases
 
-	It("should get a todo by ID", func() {
-		todoID, err := createTodo("Get Todo Test", "For testing get by ID")
+It's important to test both happy paths and error cases. Here's how to test error scenarios:
+
+```go
+It("should return error when creating todo without title", func() {
+    reqBody := `{"description": "Missing Title"}`
+
+    result := apitest.
+        New().
+        Handler(router).
+        Post("/api/todos").
+        Body(reqBody).
+        Expect(t).
+        Status(http.StatusBadRequest).
+        End()
+
+    // Check for validation error in response
+    response := result.Response
+    Expect(response.StatusCode).To(Equal(http.StatusBadRequest))
+})
+
+It("should return error for non-existent todo ID", func() {
+    // Use a non-existent UUID
+    nonExistentID := "00000000-0000-0000-0000-000000000000"
+
+    result := apitest.
+        New().
+        Handler(router).
+        Get(fmt.Sprintf("/api/todos/%s", nonExistentID)).
+        Expect(t).
+        Status(http.StatusNotFound).
+        End()
+
+    response := result.Response
+    Expect(response.StatusCode).To(Equal(http.StatusNotFound))
+})
+
+It("should return error for invalid todo ID format", func() {
+    invalidID := "not-a-uuid"
+
+    result := apitest.
+        New().
+        Handler(router).
+        Get(fmt.Sprintf("/api/todos/%s", invalidID)).
+        Expect(t).
+        Status(http.StatusBadRequest).
+        End()
+
+    response := result.Response
+    Expect(response.StatusCode).To(Equal(http.StatusBadRequest))
+})
+```
+
+## Testing Pagination
+
+For endpoints that support pagination, you should test different page sizes and page numbers:
+
+```go
+It("should list todos with pagination after creating multiple todos", func() {
+	// Create test data
+	for i := 1; i <= 15; i++ {
+		_, err := createTodo(fmt.Sprintf("Pagination Todo %d", i), fmt.Sprintf("Description %d", i))
 		Expect(err).To(BeNil())
+	}
 
-		result := apitest.
-			New().
-			Handler(router).
-			Get(fmt.Sprintf("/api/todos/%s", todoID)).
-			Expect(t).
-			Status(http.StatusOK).
-			End()
+	// Test first page
+	result := apitest.
+		New().
+		Handler(router).
+		Get("/api/todos").
+		Query("page", "1").
+		Query("limit", "10").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
 
-		response := result.Response
-		var responseBody responses.DetailResponseType[todo.TodoResponse]
+	var responseBody1 todo.TodoListResponse
+	err := json.NewDecoder(result.Response.Body).Decode(&responseBody1)
+	Expect(err).To(BeNil())
+	Expect(responseBody1.Message).To(Equal("success"))
+	Expect(len(responseBody1.Items)).To(Equal(10))
+	Expect(responseBody1.Pagination.HasNext).To(BeTrue())
 
-		err = json.NewDecoder(response.Body).Decode(&responseBody)
-		Expect(err).To(BeNil())
-		Expect(responseBody.Message).To(Equal("success"))
-		Expect(responseBody.Item.ID).To(Equal(todoID))
-		Expect(responseBody.Item.Title).To(Equal("Get Todo Test"))
-		Expect(responseBody.Item.Description).To(Equal("For testing get by ID"))
-	})
+	// Test second page
+	result2 := apitest.
+		New().
+		Handler(router).
+		Get("/api/todos").
+		Query("page", "2").
+		Query("limit", "10").
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	var responseBody2 todo.TodoListResponse
+	err = json.NewDecoder(result2.Response.Body).Decode(&responseBody2)
+	Expect(err).To(BeNil())
+	Expect(responseBody2.Message).To(Equal("success"))
+	Expect(len(responseBody2.Items)).To(BeNumerically(">", 0))
+	Expect(responseBody2.Pagination.HasNext).To(BeFalse())
+})
+
+It("should get a todo by ID", func() {
+	todoID, err := createTodo("Get Todo Test", "For testing get by ID")
+	Expect(err).To(BeNil())
+
+	result := apitest.
+		New().
+		Handler(router).
+		Get(fmt.Sprintf("/api/todos/%s", todoID)).
+		Expect(t).
+		Status(http.StatusOK).
+		End()
+
+	response := result.Response
+	var responseBody responses.DetailResponseType[todo.TodoResponse]
+
+	err = json.NewDecoder(response.Body).Decode(&responseBody)
+	Expect(err).To(BeNil())
+	Expect(responseBody.Message).To(Equal("success"))
+	Expect(responseBody.Item.ID).To(Equal(todoID))
+	Expect(responseBody.Item.Title).To(Equal("Get Todo Test"))
+	Expect(responseBody.Item.Description).To(Equal("For testing get by ID"))
 })
 ```
 

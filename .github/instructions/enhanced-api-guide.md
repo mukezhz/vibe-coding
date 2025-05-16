@@ -97,27 +97,11 @@ import (
 	"clean-architecture/pkg/errorz"
 )
 
-// Error codes specific to the todo domain
-const (
-	ErrInvalidTodoID     = "INVALID_TODO_ID"
-	ErrTodoNotFound      = "TODO_NOT_FOUND"
-	ErrTodoTitleRequired = "TODO_TITLE_REQUIRED"
+var (
+	ErrInvalidTodoID     = errorz.ErrBadRequest.JoinError("Invalid Todo ID")
+	ErrTodoNotFound      = errorz.ErrNotFound.JoinError("Todo not found")
+	ErrTodoTitleRequired = errorz.ErrBadRequest.JoinError("Todo title is required")
 )
-
-// NewInvalidTodoIDError returns a new error for invalid todo ID
-func NewInvalidTodoIDError() error {
-	return errorz.ErrBadRequest.JoinError("Invalid Todo ID")
-}
-
-// NewTodoNotFoundError returns a new error when todo is not found
-func NewTodoNotFoundError() error {
-	return errorz.ErrNotFound.JoinError("Todo not found")
-}
-
-// NewTodoTitleRequiredError returns a new error when todo title is missing
-func NewTodoTitleRequiredError() error {
-	return errorz.ErrBadRequest.JoinError("Todo title is required")
-}
 ```
 
 ### Step 4: Implement Repository Layer
@@ -142,8 +126,11 @@ type Repository struct {
 }
 
 // NewRepository creates a new todo repository
-func NewRepository(db infrastructure.Database, logger framework.Logger) Repository {
-	return Repository{db, logger}
+func NewRepository(
+	db infrastructure.Database, 
+	logger framework.Logger,
+) *Repository {
+	return &Repository{db, logger}
 }
 
 // Create creates a new todo
@@ -193,18 +180,21 @@ import (
 	"clean-architecture/domain/models"
 	"clean-architecture/pkg/framework"
 	"clean-architecture/pkg/types"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 // Service service layer
 type Service struct {
 	logger     framework.Logger
-	repository Repository
+	repository *Repository
 }
 
 // NewService creates a new todo service
 func NewService(
 	logger framework.Logger,
-	repository Repository,
+	repository *Repository,
 ) *Service {
 	return &Service{
 		logger:     logger,
@@ -221,9 +211,8 @@ func (s Service) Create(todo *models.Todo) error {
 func (s Service) GetByID(todoID types.BinaryUUID) (models.Todo, error) {
 	todo, err := s.repository.GetByID(todoID)
 	if err != nil {
-		// Check if it's a "not found" error
-		if err.Error() == "record not found" {
-			return todo, NewTodoNotFoundError()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return todo, ErrTodoNotFound
 		}
 		return todo, err
 	}
@@ -294,7 +283,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 
 	// Validate title is not empty
 	if req.Title == "" {
-		responses.HandleValidationError(ctx, c.logger, NewTodoTitleRequiredError())
+		responses.HandleValidationError(ctx, c.logger, ErrTodoTitleRequired)
 		return
 	}
 
@@ -336,7 +325,7 @@ func (c *Controller) GetTodoByID(ctx *gin.Context) {
 
 	parsedID, err := types.ShouldParseUUID(todoID)
 	if err != nil {
-		responses.HandleValidationError(ctx, c.logger, NewInvalidTodoIDError())
+		responses.HandleValidationError(ctx, c.logger, ErrInvalidTodoID)
 		return
 	}
 
@@ -370,7 +359,7 @@ func (c *Controller) UpdateTodo(ctx *gin.Context) {
 
 	parsedID, err := types.ShouldParseUUID(todoID)
 	if err != nil {
-		responses.HandleValidationError(ctx, c.logger, NewInvalidTodoIDError())
+		responses.HandleValidationError(ctx, c.logger, ErrInvalidTodoID)
 		return
 	}
 
@@ -475,48 +464,45 @@ func (c *Controller) FetchTodoWithPagination(ctx *gin.Context) {
 Define API endpoints in a route file:
 
 ```go
-// File: domain/product/route.go
-package product
+// File: domain/todo/route.go
+package todo
 
 import (
 	"clean-architecture/pkg/framework"
 	"clean-architecture/pkg/infrastructure"
 )
 
-// Route structure for products
+// Route struct
 type Route struct {
 	logger     framework.Logger
 	handler    infrastructure.Router
 	controller *Controller
 }
 
-// NewRoute initializes product routes
-// IMPORTANT: Return as POINTER
+// NewRoute creates a new route
 func NewRoute(
 	logger framework.Logger,
 	handler infrastructure.Router,
 	controller *Controller,
 ) *Route {
 	return &Route{
-		logger:     logger,
 		handler:    handler,
+		logger:     logger,
 		controller: controller,
 	}
 }
 
-// RegisterRoute configures product API endpoints
+// RegisterRoute sets up todo routes
 func RegisterRoute(r *Route) {
-	r.logger.Info("Setting up product routes")
-	
-	// Group all product routes under /api/products
-	api := r.handler.Group("/api/products")
-	
-	// Define RESTful endpoints
-	api.POST("", r.controller.CreateProduct)         // Create a product
-	api.GET("", r.controller.ListProducts)           // List all products with pagination
-	api.GET("/:id", r.controller.GetProductByID)     // Get product by ID
-	api.PUT("/:id", r.controller.UpdateProduct)      // Update product by ID
-	api.DELETE("/:id", r.controller.DeleteProduct)   // Delete product by ID
+	r.logger.Info("Setting up todo routes")
+
+	api := r.handler.Group("/api/todos")
+
+	// Todo routes based on the .bru files
+	api.POST("", r.controller.CreateTodo)
+	api.GET("", r.controller.FetchTodoWithPagination)
+	api.GET("/:id", r.controller.GetTodoByID)
+	api.PUT("/:id", r.controller.UpdateTodo)
 }
 ```
 
@@ -525,13 +511,12 @@ func RegisterRoute(r *Route) {
 Set up the module for dependency injection with fx:
 
 ```go
-// File: domain/product/module.go
-package product
+// File: domain/todo/module.go
+package todo
 
 import "go.uber.org/fx"
 
-// Module provides product dependencies
-var Module = fx.Module("product",
+var Module = fx.Module("todo",
 	fx.Options(
 		fx.Provide(
 			NewRepository,
@@ -539,9 +524,11 @@ var Module = fx.Module("product",
 			NewController,
 			NewRoute,
 		),
+		// If you want to enable auto-migrate add Migrate as shown below
+		// fx.Invoke(Migrate, RegisterRoute),
+
 		fx.Invoke(RegisterRoute),
-	),
-)
+	))
 ```
 
 ### Step 9: Add Feature Module to Domain Module
@@ -781,13 +768,13 @@ func TestCreateProduct(t *testing.T) {
 ## Common Pitfalls and Best Practices
 
 1. **Return Types for Dependencies**
-   - Repository: Return as VALUE (non-pointer)
+   - Repository: Return as POINTER
    - Service, Controller, Route: Return as POINTERS
 
 2. **Error Handling**
-   - Use domain-specific errors defined in your `errorz.go` file
-   - Use `responses.HandleError(logger, ctx, err)` for consistent error responses
-   - Use `responses.HandleValidationError(logger, ctx, err)` for validation errors
+   - Define domain-specific errors in your `errorz.go` file using `errorz.ErrBadRequest.JoinError()` or `errorz.ErrNotFound.JoinError()` pattern
+   - Use `responses.HandleError(ctx, c.logger, err)` for consistent error responses
+   - Use `responses.HandleValidationError(ctx, c.logger, err)` for validation errors
 
 3. **Validation**
    - Use `binding` tags on request DTOs

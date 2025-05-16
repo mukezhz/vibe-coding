@@ -16,6 +16,9 @@ docs {} section is custom another is standard. Here is the following format of t
     path: { // dynamic path variable
         key: datatype
     }
+    query: { // optional query parameters
+        key: datatype
+    }
 }
 ```
 
