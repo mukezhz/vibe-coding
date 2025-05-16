@@ -8,6 +8,9 @@ Clean Architecture with [Gin Web Framework](https://github.com/gin-gonic/gin)
 -   Application backbone with [Gin Web Framework](https://github.com/gin-gonic/gin)
 -   Dependency injection using [uber-go/fx](https://pkg.go.dev/go.uber.org/fx)
 -   Uses fully featured [GORM](https://gorm.io/index.html)
+-   Database migrations with [Atlas](https://atlasgo.io/) for declarative, versioned schema changes
+-   BDD-style testing with [Ginkgo](https://onsi.github.io/ginkgo/)
+-   Isolated integration testing with [TestContainers](https://testcontainers.com/)
 
 ## Linter setup
 
@@ -122,19 +125,33 @@ Below are the supported `make` commands for managing database migrations:
 
 ## Testing
 
-The framework comes with unit and integration testing support out of the box. You can check examples written in tests directory.
+The framework comes with comprehensive unit and integration testing support out of the box, powered by several modern testing tools:
 
-To run the test just run:
+- **[Ginkgo](https://onsi.github.io/ginkgo/)**: A BDD-style testing framework
+- **[TestContainers](https://testcontainers.com/)**: For isolated, containerized integration testing
+- **[Atlas](https://atlasgo.io/)**: For database schema migration testing
+
+For detailed test instructions and examples, see our [testing guide](./.github/instructions/testing.instructions.md).
+
+### Running Tests
+
+To run all tests:
 
 ```zsh
 go test ./... -v
 ```
 
-### For test coverage
+To run tests with coverage using Ginkgo:
+
+```zsh
+ginkgo -v --cover -r ./domain/... ./pkg/...
+```
+
+### For test coverage report
 
 ```zsh
 go test ./... -v -coverprofile cover.txt -coverpkg=./...
-go tool cover -html=cover.txt -o index.html
+go tool cover -html=cover.txt -o coverage.html
 ```
 
 ### Update Dependencies
