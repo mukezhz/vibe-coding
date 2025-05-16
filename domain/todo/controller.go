@@ -45,7 +45,7 @@ func (c *Controller) CreateTodo(ctx *gin.Context) {
 
 	// Validate title is not empty
 	if req.Title == "" {
-		responses.HandleValidationError(ctx, c.logger, NewTodoTitleRequiredError())
+		responses.HandleValidationError(ctx, c.logger, ErrTodoTitleRequired)
 		return
 	}
 
@@ -87,7 +87,7 @@ func (c *Controller) GetTodoByID(ctx *gin.Context) {
 
 	parsedID, err := types.ShouldParseUUID(todoID)
 	if err != nil {
-		responses.HandleValidationError(ctx, c.logger, NewInvalidTodoIDError())
+		responses.HandleValidationError(ctx, c.logger, ErrInvalidTodoID)
 		return
 	}
 
@@ -121,7 +121,7 @@ func (c *Controller) UpdateTodo(ctx *gin.Context) {
 
 	parsedID, err := types.ShouldParseUUID(todoID)
 	if err != nil {
-		responses.HandleValidationError(ctx, c.logger, NewInvalidTodoIDError())
+		responses.HandleValidationError(ctx, c.logger, ErrInvalidTodoID)
 		return
 	}
 

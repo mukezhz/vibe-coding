@@ -16,24 +16,26 @@ import (
 	"go.uber.org/fx"
 )
 
-var (
-	t      GinkgoTInterface
-	router infrastructure.Router
-)
-var _ = BeforeSuite(func() {
-	t = GinkgoT()
-	setupDI := func() {
-		err := testutil.DI(t,
-			fx.Populate(&router),
-		)
-		if err != nil {
-			t.Error(err)
-		}
-	}
-	setupDI()
-})
+var _ = Describe("Domain/Todo/Route", Ordered, func() {
+	var (
+		router      infrastructure.Router
+		todoService *todo.Service
+		todoRepo    *todo.Repository
+	)
 
-var _ = Describe("Domain/Todo/Route", func() {
+	BeforeAll(func() {
+		setupDI := func() {
+			err := testutil.DI(t,
+				fx.Populate(&router),
+				fx.Populate(&todoService),
+				fx.Populate(&todoRepo),
+			)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+		setupDI()
+	})
 
 	createTodo := func(title string, description string) (string, error) {
 		reqBody := fmt.Sprintf(`{"title": "%s", "description": "%s"}`, title, description)

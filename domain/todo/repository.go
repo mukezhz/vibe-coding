@@ -14,8 +14,8 @@ type Repository struct {
 }
 
 // NewRepository creates a new todo repository
-func NewRepository(db infrastructure.Database, logger framework.Logger) Repository {
-	return Repository{db, logger}
+func NewRepository(db infrastructure.Database, logger framework.Logger) *Repository {
+	return &Repository{db, logger}
 }
 
 // Create creates a new todo

@@ -13,3 +13,8 @@ func TestTodo(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Todo Suite")
 }
+
+var t GinkgoTInterface
+var _ = BeforeSuite(func() {
+	t = GinkgoT()
+})

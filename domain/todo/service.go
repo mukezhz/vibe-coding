@@ -4,6 +4,9 @@ import (
 	"clean-architecture/domain/models"
 	"clean-architecture/pkg/framework"
 	"clean-architecture/pkg/types"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 // Service service layer
@@ -15,11 +18,11 @@ type Service struct {
 // NewService creates a new todo service
 func NewService(
 	logger framework.Logger,
-	repository Repository,
+	repository *Repository,
 ) *Service {
 	return &Service{
 		logger:     logger,
-		repository: repository,
+		repository: *repository,
 	}
 }
 
@@ -32,9 +35,8 @@ func (s Service) Create(todo *models.Todo) error {
 func (s Service) GetByID(todoID types.BinaryUUID) (models.Todo, error) {
 	todo, err := s.repository.GetByID(todoID)
 	if err != nil {
-		// Check if it's a "not found" error
-		if err.Error() == "record not found" {
-			return todo, NewTodoNotFoundError()
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return todo, ErrTodoNotFound
 		}
 		return todo, err
 	}
