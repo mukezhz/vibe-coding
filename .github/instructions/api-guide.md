@@ -1,3 +1,6 @@
+---
+applyTo: "**/*.go"
+---
 # Complete Guide to Creating REST APIs in Our Go Clean Architecture
 
 This enhanced guide provides concrete examples, code snippets, and patterns to help LLMs and developers generate consistent REST API endpoints in our Go Clean Architecture project.

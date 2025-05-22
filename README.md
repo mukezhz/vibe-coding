@@ -12,6 +12,18 @@ Clean Architecture with [Gin Web Framework](https://github.com/gin-gonic/gin)
 -   BDD-style testing with [Ginkgo](https://onsi.github.io/ginkgo/)
 -   Isolated integration testing with [TestContainers](https://testcontainers.com/)
 
+## Documentation
+
+Comprehensive documentation for this project is available in the `.github/instructions` directory:
+
+- [Architecture Guide](.github/instructions/consolidated-architecture-guide.md) - Project structure, layers, and coding guidelines
+- [API Development Guide](.github/instructions/consolidated-api-guide.md) - Creating REST APIs with examples
+- [Error Handling Guide](.github/instructions/consolidated-error-handling.md) - Error types and handling patterns
+- [Testing Guide](.github/instructions/consolidated-testing-guide.md) - Writing service and API tests
+- [Request/Response Format](.github/instructions/request-response-format.md) - Standardized request/response formats
+
+See the [Instructions README](.github/instructions/README.md) for more details about the documentation.
+
 ## Linter setup
 
 Need [Python3](https://www.python.org/) to setup linter in git pre-commit hook.
