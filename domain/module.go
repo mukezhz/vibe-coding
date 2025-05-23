@@ -2,6 +2,7 @@ package domain
 
 import (
 	"clean-architecture/domain/booking"
+	"clean-architecture/domain/cms"
 	"clean-architecture/domain/organization"
 	"clean-architecture/domain/todo"
 	"clean-architecture/domain/user"
@@ -15,5 +16,6 @@ var Module = fx.Module("domain",
 		todo.Module,
 		organization.Module,
 		booking.Module,
+		cms.Module,
 	),
 )
